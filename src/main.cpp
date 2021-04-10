@@ -116,8 +116,7 @@ return s;
 
 void loadConfig(){
   //load all parameters from storage
-//uuid= EEPROM.read(0);
-uuid="1d4c55c3-fbb5-4cb3-b898-326d6e57d76c";
+uuid= stringFromEEPROM(0,36);
 ssid=stringFromEEPROM(37,32);
 password=stringFromEEPROM(69,64);
 server=stringFromEEPROM(133,100);
@@ -218,7 +217,7 @@ void createWebServer()
         content += ipStr;
         content += "<p>";
         content += st;
-        content += "</p><form method='get' action='setting'><label>SSID: </label><input name='ssid' length=32><input name='pass' length=64><input name='server' length=100><input type='submit'></form>";
+        content += "</p><form method='get' action='setting'><label>SSID: </label><input name='ssid' length=32><br><label>Password: </label><input name='pass' length=64><br><label>Server: </label><input name='server' length=100><br><label>UUID: </label><input name='uuid' length=36><input type='submit'></form>";
         content += "</html>";
         webServer.send(200, "text/html", content);  
     });
@@ -239,6 +238,7 @@ void createWebServer()
         String qsid = webServer.arg("ssid");
         String qpass = webServer.arg("pass");
         String qserver = webServer.arg("server");
+        String quuid = webServer.arg("uuid");
         if (qsid.length() > 0 && qpass.length() > 0) {
           
           WiFi.begin(qsid,qpass);
@@ -247,7 +247,7 @@ void createWebServer()
             Serial.print(".");
           }
           Serial.println("Connected to: "+qsid+"with pass: "+qpass);
-          saveConfig("-1",qsid,qpass,qserver);
+          saveConfig(quuid,qsid,qpass,qserver);
           content = "<!DOCTYPE HTML>\r\n<html>Successfully connect to WiFi";
           statusCode = 200;
         } else {
