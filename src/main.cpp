@@ -6,6 +6,7 @@
 #include <Ticker.h>
 #include <DNSServer.h>
 #include <ESP8266HTTPClient.h>
+#include <Adafruit_BME280.h>
 
 #define LED_Mode 14
 
@@ -29,6 +30,7 @@ DNSServer dnsServer;
 boolean setupmode =false;
 WiFiClient wificlient;
 PubSubClient pubSubClient(wificlient);
+Adafruit_BME280 bme;
 
 void toggleLED(){
   Serial.println("toggle");
@@ -320,7 +322,10 @@ void setup() {
         }
     }
   //measurement();
-  float temp=30;
+  float temp = bme.readTemperature();
+  /*float humidity = bme.readHumidity();
+  float pressure = bme.readPressure()/100.0F;*/
+  /*float temp=30;*/
   float pressure=50;
   float humidity=40;
   //sendData();
