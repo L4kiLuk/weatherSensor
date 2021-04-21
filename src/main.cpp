@@ -6,6 +6,7 @@
 #include <Ticker.h>
 #include <DNSServer.h>
 #include <ESP8266HTTPClient.h>
+#include <Adafruit_Sensor.h>
 #include <Adafruit_BME280.h>
 
 #define LED_Mode 14
@@ -30,7 +31,7 @@ DNSServer dnsServer;
 boolean setupmode =false;
 WiFiClient wificlient;
 PubSubClient pubSubClient(wificlient);
-Adafruit_BME280 bme;
+Adafruit_BME280 bme; // I2C
 
 void toggleLED(){
   Serial.println("toggle");
@@ -70,9 +71,7 @@ void connectMQTT(){
   client.subscribe("sensor/#");
 }
 
-void measurement(){
-  // do a measurement
-}
+
 
 void sendData(){
   //send data of measurement over mqtt 
@@ -322,12 +321,16 @@ void setup() {
         }
     }
   //measurement();
+  bme.begin(0x76);
   float temp = bme.readTemperature();
   /*float humidity = bme.readHumidity();
   float pressure = bme.readPressure()/100.0F;*/
   /*float temp=30;*/
-  float pressure=50;
-  float humidity=40;
+  float pressure=bme.readPressure();
+  float humidity=bme.readHumidity();
+  Serial.println(temp);
+  Serial.println(pressure);
+  Serial.println(humidity);
   //sendData();
   client.publish(String("sensor/"+uuid+"/temperature").c_str(),String(temp).c_str());
   client.publish(String("sensor/"+uuid+"/pressure").c_str(),String(pressure).c_str());
@@ -335,7 +338,7 @@ void setup() {
   
   //client.loop();
   
-  //ESP.deepSleep(sleeptime);
+  ESP.deepSleep(60000000);
   }
 }
 
