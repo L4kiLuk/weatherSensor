@@ -16,7 +16,7 @@ String password;
 String server;
 int mqttPort;
 String uuid;
-int sleeptime;
+int sleeptime= 15;
 int statusCode;
 int ledstate = LOW;
 String content;
@@ -31,6 +31,9 @@ DNSServer dnsServer;
 boolean setupmode =false;
 WiFiClient wificlient;
 PubSubClient pubSubClient(wificlient);
+String mqttuser = "sensor";
+String mqttpassword = "1234";
+String mqttTopic ="nordseite/weathersensor";
 Adafruit_BME280 bme; // I2C
 
 void toggleLED(){
@@ -127,7 +130,7 @@ Serial.println("ssid: "+ssid);
 Serial.println("password: "+password);
 Serial.println("server: "+server);
 mqttPort = 1883;
-sleeptime =1;
+
 }
 
 void setupWiFi() {
@@ -310,35 +313,38 @@ void setup() {
     Serial.println(WiFi.localIP());  
   
   //connectMQTT();
-  client.setServer(server.c_str(),1883);
+  client.setServer(server.c_str(),mqttPort);
   while (!client.connected()) {
-        Serial.print("Reconnecting...");
-        if (!client.connect("ESP8266Client","mqtt","mqtt")) {
+        Serial.print("Connecting...");
+        if (!client.connect("ESP8266Client",mqttuser.c_str(),mqttpassword.c_str())) {
             Serial.print("failed, rc=");
             Serial.print(client.state());
             Serial.println(" retrying in 5 seconds");
             delay(5000);
         }
     }
-  //measurement();
+  //measurement
   bme.begin(0x76);
   float temp = bme.readTemperature();
-  /*float humidity = bme.readHumidity();
-  float pressure = bme.readPressure()/100.0F;*/
-  /*float temp=30;*/
-  float pressure=bme.readPressure();
+  float pressure=bme.readPressure()/100.0F;
   float humidity=bme.readHumidity();
   Serial.println(temp);
   Serial.println(pressure);
   Serial.println(humidity);
-  //sendData();
-  client.publish(String("sensor/"+uuid+"/temperature").c_str(),String(temp).c_str());
+
+  //Publish
+  //to joel id:cb430239-18d0-432e-818a-cb36c1c44100
+  /*client.publish(String("sensor/"+uuid+"/temperature").c_str(),String(temp).c_str());
   client.publish(String("sensor/"+uuid+"/pressure").c_str(),String(pressure).c_str());
   client.publish(String("sensor/"+uuid+"/humidity").c_str(),String(humidity).c_str());
+  */
+
+  //to Homeassistant
+  client.publish(mqttTopic.c_str(),String("{\"temperature\": "+String(temp)+",\"pressure\": "+String(pressure)+", \"humidity\": "+String(humidity)+" }").c_str(),true);  
+  client.disconnect();
   
-  //client.loop();
   
-  ESP.deepSleep(60000000);
+  ESP.deepSleep(sleeptime*60e6);
   }
 }
 
@@ -348,6 +354,6 @@ void loop() {
   dnsServer.processNextRequest();
   webServer.handleClient();
   }else{
-  
+    
   }
 }
