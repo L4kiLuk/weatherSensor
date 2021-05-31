@@ -302,11 +302,18 @@ void setup() {
     loadConfig();
     Serial.println("Password"+ssid);
     Serial.println(password);
+
+    //connectWIFI
     WiFi.mode(WIFI_STA);
     WiFi.begin(ssid,password);
+    int i =0;
     while (WiFi.status() != WL_CONNECTED) {
             delay(500);
             Serial.print(".");
+            i++;
+            if(i>10){
+              ESP.deepSleep(5*60e6);
+            }
     }
     Serial.println("Connected to: ");
     Serial.println(ssid);
