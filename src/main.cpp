@@ -8,6 +8,7 @@
 #include <ESP8266HTTPClient.h>
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BME280.h>
+#include <sstream>
 
 #define LED_Mode 14
 
@@ -203,7 +204,7 @@ void regist()
   //regist sensor over restAPI and save id#
   Serial.println("regist");
   HTTPClient http;
-  http.begin("https://" + server + "/registerWeatherSensor");
+  http.begin(espClient,"https://" + server + "/registerWeatherSensor");
   http.addHeader("Content-Type", "text/plain");
   int httpcode = http.POST("newSensor");
   Serial.println(httpcode);
